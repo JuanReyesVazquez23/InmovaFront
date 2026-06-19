@@ -1,0 +1,200 @@
+/* ─── INMOVA Design System ──────────────────────────────────────────────────── */
+
+:root {
+  /* Palette */
+  --c-navy:     #0A1628;
+  --c-navy-mid: #122040;
+  --c-blue:     #1A6FCC;
+  --c-blue-lt:  #2E8BF0;
+  --c-cyan:     #00B4D8;
+  --c-white:    #FFFFFF;
+  --c-off-white:#F4F7FC;
+  --c-gray-100: #EEF1F6;
+  --c-gray-300: #C4CAD4;
+  --c-gray-500: #7A8499;
+  --c-gray-700: #3D4452;
+  --c-dark:     #111827;
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  /* Spacing */
+  --space-xs:  0.5rem;
+  --space-sm:  1rem;
+  --space-md:  1.5rem;
+  --space-lg:  2.5rem;
+  --space-xl:  4rem;
+  --space-2xl: 6rem;
+
+  /* Radius */
+  --r-sm:  6px;
+  --r-md:  12px;
+  --r-lg:  20px;
+  --r-full: 999px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(10,22,40,.12);
+  --shadow-hover: 0 12px 40px rgba(10,22,40,.22);
+  --shadow-btn:  0 4px 16px rgba(26,111,204,.35);
+
+  /* Transitions */
+  --ease: cubic-bezier(.4,0,.2,1);
+  --dur:  0.25s;
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--c-white);
+  color: var(--c-dark);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+  /* Lazy loading default – individual imgs use loading="lazy" */
+}
+
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+/* ─── Utility Classes ─────────────────────────────────────────────────────── */
+.container {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: var(--space-md);
+}
+
+.section-padding {
+  padding-block: var(--space-2xl);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--c-navy);
+}
+
+.section-subtitle {
+  font-size: 1.05rem;
+  color: var(--c-gray-500);
+  margin-top: var(--space-xs);
+  max-width: 580px;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-blue);
+  margin-bottom: var(--space-xs);
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.75rem 1.75rem;
+  border-radius: var(--r-full);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all var(--dur) var(--ease);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--c-blue);
+  color: var(--c-white);
+  box-shadow: var(--shadow-btn);
+}
+.btn-primary:hover {
+  background: var(--c-blue-lt);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(26,111,204,.4);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--c-white);
+  border: 2px solid rgba(255,255,255,.6);
+}
+.btn-outline:hover {
+  background: rgba(255,255,255,.15);
+  border-color: var(--c-white);
+}
+
+.btn-whatsapp {
+  background: #25D366;
+  color: var(--c-white);
+  box-shadow: 0 4px 16px rgba(37,211,102,.35);
+}
+.btn-whatsapp:hover {
+  background: #1ebe5a;
+  transform: translateY(-2px);
+}
+
+.btn-dark {
+  background: var(--c-navy);
+  color: var(--c-white);
+}
+.btn-dark:hover {
+  background: var(--c-navy-mid);
+  transform: translateY(-2px);
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--c-gray-100); }
+::-webkit-scrollbar-thumb { background: var(--c-blue); border-radius: 3px; }
+
+/* ─── Focus visible ───────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--c-blue);
+  outline-offset: 3px;
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.fade-up   { animation: fadeUp  0.6s var(--ease) both; }
+.fade-in   { animation: fadeIn  0.5s var(--ease) both; }
+.delay-100 { animation-delay: .1s; }
+.delay-200 { animation-delay: .2s; }
+.delay-300 { animation-delay: .3s; }
+.delay-400 { animation-delay: .4s; }
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -1,0 +1,115 @@
+/* ─── Contact Form ──────────────────────────────────────────────────────────── */
+.contact-form { display: flex; flex-direction: column; gap: 1.1rem; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-navy);
+}
+.form-label span { color: var(--c-blue); }
+
+.form-input {
+  padding: 0.8rem 1rem;
+  border: 1.5px solid var(--c-gray-300);
+  border-radius: var(--r-md);
+  font-size: 0.92rem;
+  color: var(--c-dark);
+  background: var(--c-white);
+  transition: border-color var(--dur), box-shadow var(--dur);
+  width: 100%;
+}
+.form-input:focus {
+  border-color: var(--c-blue);
+  box-shadow: 0 0 0 3px rgba(26,111,204,.12);
+}
+.form-input.invalid {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229,62,62,.1);
+}
+.form-input::placeholder { color: var(--c-gray-300); }
+.form-textarea { resize: vertical; min-height: 100px; }
+
+.form-field-error {
+  font-size: 0.78rem;
+  color: #e53e3e;
+  font-weight: 500;
+}
+
+.form-error-banner {
+  background: #fff5f5;
+  border: 1px solid #feb2b2;
+  color: #c53030;
+  padding: 0.75rem 1rem;
+  border-radius: var(--r-md);
+  font-size: 0.88rem;
+}
+
+.contact-submit {
+  width: 100%;
+  justify-content: center;
+  padding: 0.9rem;
+  font-size: 1rem;
+}
+
+.form-privacy {
+  font-size: 0.75rem;
+  color: var(--c-gray-500);
+  text-align: center;
+}
+
+/* Success state */
+.contact-success {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+}
+.success-icon {
+  width: 60px; height: 60px;
+  background: #e6fff0;
+  color: #16a34a;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+}
+.contact-success h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--c-navy);
+  margin-bottom: 0.5rem;
+}
+.contact-success p {
+  color: var(--c-gray-500);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+.success-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width: 540px) {
+  .form-row { grid-template-columns: 1fr; }
+}
