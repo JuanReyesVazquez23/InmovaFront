@@ -3,26 +3,19 @@ import LandingPage from './pages/LandingPage.jsx'
 import AdminPanel from './pages/AdminPanel.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 
-/**
- * App – Root router.
- * Admin panel is reached ONLY by tapping the footer 5× then logging in.
- * The /admin route is not exposed in navigation or any link.
- */
+/* Backend URL from env — set VITE_API_URL in Railway frontend variables */
+const API = import.meta.env.VITE_API_URL || ''
+
 export default function App() {
-  const [view, setView] = useState('landing') // 'landing' | 'login' | 'admin'
+  const [view, setView]       = useState('landing')
   const [adminAuth, setAdminAuth] = useState(false)
 
-  // Check if already authenticated (session cookie)
   useEffect(() => {
-    fetch('/api/admin/check', { credentials: 'include' })
+    fetch(`${API}/api/admin/check`, { credentials: 'include' })
       .then(r => r.json())
-      .then(d => { if (d.authenticated) setAdminAuth(true) })
+      .then(d => { if (d.authenticated) { setAdminAuth(true); setView('admin') } })
       .catch(() => {})
   }, [])
-
-  const handleFooterSecret = () => {
-    setView('login')
-  }
 
   const handleLoginSuccess = () => {
     setAdminAuth(true)
@@ -30,13 +23,13 @@ export default function App() {
   }
 
   const handleLogout = async () => {
-    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' })
+    await fetch(`${API}/api/admin/logout`, { method: 'POST', credentials: 'include' })
     setAdminAuth(false)
     setView('landing')
   }
 
   if (view === 'admin' && adminAuth) {
-    return <AdminPanel onLogout={handleLogout} />
+    return <AdminPanel onLogout={handleLogout} apiBase={API} />
   }
 
   if (view === 'login') {
@@ -44,9 +37,10 @@ export default function App() {
       <AdminLogin
         onSuccess={handleLoginSuccess}
         onCancel={() => setView('landing')}
+        apiBase={API}
       />
     )
   }
 
-  return <LandingPage onSecretFooterTap={handleFooterSecret} />
+  return <LandingPage onSecretFooterTap={() => setView('login')} />
 }

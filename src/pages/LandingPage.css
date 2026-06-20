@@ -1,3 +1,44 @@
+/* ─── Nav Options Bar ───────────────────────────────────────────────────────── */
+.nav-options-bar {
+  background: var(--c-navy);
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.nav-options-inner {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+}
+.nav-option-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0.6rem 2rem;
+  border-right: 1px solid rgba(255,255,255,.1);
+  text-decoration: none;
+  transition: background var(--dur);
+}
+.nav-option-item:last-child { border-right: none; }
+.nav-option-item:hover { background: rgba(255,255,255,.07); }
+.nav-option-icon {
+  font-size: 1.1rem;
+  color: var(--c-cyan);
+}
+.nav-option-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255,255,255,.7);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+@media (max-width: 540px) {
+  .nav-option-item { padding: 0.6rem 1rem; }
+  .nav-option-label { font-size: 0.62rem; }
+}
+
 /* ─── Stats Bar ─────────────────────────────────────────────────────────────── */
 .stats-bar {
   background: var(--c-navy);
@@ -130,40 +171,41 @@
   align-items: center;
 }
 .about-img-wrap {
-  position: relative;
   border-radius: var(--r-lg);
   overflow: hidden;
   box-shadow: var(--shadow-hover);
 }
 .about-img {
   width: 100%;
-  height: 420px;
+  height: 380px;
   object-fit: cover;
   display: block;
+  transition: transform 0.5s var(--ease);
 }
-.about-badge {
-  position: absolute;
-  bottom: 2rem; right: -1.5rem;
+.about-img-wrap:hover .about-img { transform: scale(1.04); }
+.about-badge-below {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   background: var(--c-blue);
   color: var(--c-white);
   border-radius: var(--r-md);
   padding: 1rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 8px 24px rgba(26,111,204,.4);
+  margin-top: 1rem;
+  box-shadow: var(--shadow-btn);
 }
-.about-badge__num {
+.about-badge-num {
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 700;
   line-height: 1;
+  flex-shrink: 0;
 }
-.about-badge__txt {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-top: 4px;
+.about-badge-txt {
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: .9;
 }
 .about-p {
   color: var(--c-gray-700);
@@ -192,6 +234,39 @@
 .value-desc {
   font-size: 0.8rem;
   color: var(--c-gray-500);
+}
+
+/* ─── Interior Showcase ─────────────────────────────────────────────────────── */
+.interior-showcase {
+  background: var(--c-navy);
+  padding-block: var(--space-2xl);
+}
+.interior-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+.interior-img-wrap {
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-hover);
+}
+.interior-img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s var(--ease);
+}
+.interior-img-wrap:hover .interior-img { transform: scale(1.04); }
+
+@media (max-width: 768px) {
+  .interior-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .interior-img { height: 260px; }
 }
 
 /* ─── Agents ────────────────────────────────────────────────────────────────── */

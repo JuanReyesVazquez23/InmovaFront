@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import './AdminPanel.css'
 
-/* ─── Sub-components ──────────────────────────────────────────────────────── */
-
-/* Reusable Modal */
+/* ─── Modal ───────────────────────────────────────────────────────────────── */
 function Modal({ title, onClose, children }) {
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -29,7 +27,7 @@ function Modal({ title, onClose, children }) {
   )
 }
 
-/* Property Form */
+/* ─── Property Form ───────────────────────────────────────────────────────── */
 function PropertyForm({ initial, onSave, onCancel, loading }) {
   const empty = {
     title: '', description: '', price: '', currency: 'USD',
@@ -37,9 +35,8 @@ function PropertyForm({ initial, onSave, onCancel, loading }) {
     type: 'apartamento', status: 'venta', featured: false,
     image_url: '', whatsapp: '', active: true,
   }
-  const [form, setForm] = useState(initial || empty)
+  const [form, setForm]   = useState(initial || empty)
   const [errors, setErrors] = useState({})
-
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const validate = () => {
@@ -159,9 +156,7 @@ function PropertyForm({ initial, onSave, onCancel, loading }) {
       </div>
 
       <div className="admin-form-actions">
-        <button type="button" className="btn btn-outline-dark" onClick={onCancel}>
-          Cancelar
-        </button>
+        <button type="button" className="btn btn-outline-dark" onClick={onCancel}>Cancelar</button>
         <button type="submit" className="btn btn-primary" disabled={loading}>
           {loading ? <><span className="spinner" /> Guardando…</> : 'Guardar propiedad'}
         </button>
@@ -170,10 +165,10 @@ function PropertyForm({ initial, onSave, onCancel, loading }) {
   )
 }
 
-/* Agent Form */
+/* ─── Agent Form ──────────────────────────────────────────────────────────── */
 function AgentForm({ initial, onSave, onCancel, loading }) {
   const empty = { name: '', role: '', bio: '', phone: '', email: '', whatsapp: '', image_url: '', active: true }
-  const [form, setForm] = useState(initial || empty)
+  const [form, setForm]   = useState(initial || empty)
   const [errors, setErrors] = useState({})
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -197,7 +192,7 @@ function AgentForm({ initial, onSave, onCancel, loading }) {
     <form onSubmit={handleSubmit} className="admin-form" noValidate>
       <div className="admin-form-grid2">
         <F id="af-name" label="Nombre completo *" err={errors.name}>
-          <input id="af-name" className={`admin-input${errors.name?' err':''}`}
+          <input id="af-name" className={`admin-input${errors.name ? ' err' : ''}`}
             value={form.name} onChange={e => set('name', e.target.value)} />
         </F>
         <F id="af-role" label="Cargo">
@@ -228,7 +223,8 @@ function AgentForm({ initial, onSave, onCancel, loading }) {
           value={form.image_url} onChange={e => set('image_url', e.target.value)} />
       </F>
       {form.image_url && (
-        <img src={form.image_url} alt="Vista previa" className="admin-img-preview admin-img-round" />
+        <img src={form.image_url} alt="Vista previa"
+          className="admin-img-preview admin-img-round" loading="lazy" />
       )}
       <label className="admin-check-label">
         <input type="checkbox" checked={form.active}
@@ -246,15 +242,15 @@ function AgentForm({ initial, onSave, onCancel, loading }) {
 }
 
 /* ─── Main Panel ──────────────────────────────────────────────────────────── */
-export default function AdminPanel({ onLogout }) {
-  const [tab, setTab]               = useState('properties') // 'properties'|'agents'|'leads'
+export default function AdminPanel({ onLogout, apiBase = '' }) {
+  const [tab, setTab]               = useState('properties')
   const [properties, setProperties] = useState([])
   const [agents, setAgents]         = useState([])
   const [leads, setLeads]           = useState([])
   const [loading, setLoading]       = useState(true)
   const [saving, setSaving]         = useState(false)
-  const [modal, setModal]           = useState(null) // null | { type, data }
-  const [confirm, setConfirm]       = useState(null) // null | { msg, onOk }
+  const [modal, setModal]           = useState(null)
+  const [confirm, setConfirm]       = useState(null)
   const [toast, setToast]           = useState(null)
 
   const showToast = (msg, ok = true) => {
@@ -262,36 +258,36 @@ export default function AdminPanel({ onLogout }) {
     setTimeout(() => setToast(null), 3500)
   }
 
-  /* ── Fetch all data ──────────────────────────────────────────────────────── */
   const loadAll = useCallback(async () => {
     setLoading(true)
     try {
       const [pRes, aRes, lRes] = await Promise.all([
-        fetch('/api/admin/properties', { credentials: 'include' }),
-        fetch('/api/admin/agents',     { credentials: 'include' }),
-        fetch('/api/admin/leads',      { credentials: 'include' }),
+        fetch(`${apiBase}/api/admin/properties`, { credentials: 'include' }),
+        fetch(`${apiBase}/api/admin/agents`,     { credentials: 'include' }),
+        fetch(`${apiBase}/api/admin/leads`,      { credentials: 'include' }),
       ])
+      if (pRes.status === 401) { onLogout(); return }
       setProperties(await pRes.json())
       setAgents(await aRes.json())
       setLeads(await lRes.json())
-    } catch (err) {
+    } catch {
       showToast('Error al cargar datos.', false)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [apiBase, onLogout])
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  /* ── Properties CRUD ─────────────────────────────────────────────────────── */
+  /* ── Properties CRUD ────────────────────────────────────────────────────── */
   const saveProperty = async (form) => {
     setSaving(true)
     try {
       const isEdit = modal?.data?.id
-      const url    = isEdit ? `/api/admin/properties/${modal.data.id}` : '/api/admin/properties'
-      const method = isEdit ? 'PUT' : 'POST'
+      const url    = isEdit ? `${apiBase}/api/admin/properties/${modal.data.id}` : `${apiBase}/api/admin/properties`
       const res    = await fetch(url, {
-        method, credentials: 'include',
+        method: isEdit ? 'PUT' : 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
@@ -308,24 +304,24 @@ export default function AdminPanel({ onLogout }) {
 
   const deleteProperty = (id) => {
     setConfirm({
-      msg: '¿Eliminar esta propiedad? (se ocultará del sitio)',
+      msg: '¿Eliminar esta propiedad? Se ocultará del sitio.',
       onOk: async () => {
-        await fetch(`/api/admin/properties/${id}`, { method: 'DELETE', credentials: 'include' })
+        await fetch(`${apiBase}/api/admin/properties/${id}`, { method: 'DELETE', credentials: 'include' })
         showToast('Propiedad eliminada.')
         loadAll()
       },
     })
   }
 
-  /* ── Agents CRUD ─────────────────────────────────────────────────────────── */
+  /* ── Agents CRUD ────────────────────────────────────────────────────────── */
   const saveAgent = async (form) => {
     setSaving(true)
     try {
       const isEdit = modal?.data?.id
-      const url    = isEdit ? `/api/admin/agents/${modal.data.id}` : '/api/admin/agents'
-      const method = isEdit ? 'PUT' : 'POST'
+      const url    = isEdit ? `${apiBase}/api/admin/agents/${modal.data.id}` : `${apiBase}/api/admin/agents`
       const res    = await fetch(url, {
-        method, credentials: 'include',
+        method: isEdit ? 'PUT' : 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
@@ -344,22 +340,21 @@ export default function AdminPanel({ onLogout }) {
     setConfirm({
       msg: '¿Desactivar este asesor?',
       onOk: async () => {
-        await fetch(`/api/admin/agents/${id}`, { method: 'DELETE', credentials: 'include' })
+        await fetch(`${apiBase}/api/admin/agents/${id}`, { method: 'DELETE', credentials: 'include' })
         showToast('Asesor desactivado.')
         loadAll()
       },
     })
   }
 
-  /* ── Leads ───────────────────────────────────────────────────────────────── */
+  /* ── Leads ──────────────────────────────────────────────────────────────── */
   const markRead = async (id) => {
-    await fetch(`/api/admin/leads/${id}/read`, { method: 'PUT', credentials: 'include' })
+    await fetch(`${apiBase}/api/admin/leads/${id}/read`, { method: 'PUT', credentials: 'include' })
     setLeads(ls => ls.map(l => l.id === id ? { ...l, read: true } : l))
   }
 
   const unreadCount = leads.filter(l => !l.read).length
 
-  /* ── Render ──────────────────────────────────────────────────────────────── */
   return (
     <div className="admin-panel">
       {/* Sidebar */}
@@ -372,7 +367,7 @@ export default function AdminPanel({ onLogout }) {
         <nav className="admin-nav" aria-label="Panel de administración">
           {[
             { key: 'properties', icon: '🏠', label: 'Propiedades' },
-            { key: 'agents',     icon: '👤', label: 'Asesores'   },
+            { key: 'agents',     icon: '👤', label: 'Asesores' },
             { key: 'leads',      icon: '✉️', label: 'Mensajes', badge: unreadCount },
           ].map(item => (
             <button
@@ -397,38 +392,29 @@ export default function AdminPanel({ onLogout }) {
         </button>
       </aside>
 
-      {/* Main content */}
+      {/* Main */}
       <main className="admin-main">
-        {/* ── Properties Tab ─────────────────────────────────────────────── */}
+
+        {/* ── Properties ───────────────────────────────────────────────── */}
         {tab === 'properties' && (
-          <section aria-labelledby="props-tab-title">
+          <section>
             <div className="admin-section-header">
               <div>
-                <h1 className="admin-section-title" id="props-tab-title">Propiedades</h1>
+                <h1 className="admin-section-title">Propiedades</h1>
                 <p className="admin-section-sub">{properties.length} en total</p>
               </div>
-              <button
-                className="btn btn-primary"
-                onClick={() => setModal({ type: 'new-property' })}
-              >
+              <button className="btn btn-primary" onClick={() => setModal({ type: 'new-property' })}>
                 + Nueva propiedad
               </button>
             </div>
 
-            {loading ? (
-              <div className="admin-loading">Cargando…</div>
-            ) : (
+            {loading ? <div className="admin-loading">Cargando…</div> : (
               <div className="admin-table-wrap">
                 <table className="admin-table" aria-label="Lista de propiedades">
                   <thead>
                     <tr>
-                      <th>Imagen</th>
-                      <th>Título</th>
-                      <th>Precio</th>
-                      <th>Estado</th>
-                      <th>Tipo</th>
-                      <th>Visible</th>
-                      <th>Acciones</th>
+                      <th>Imagen</th><th>Título</th><th>Precio</th>
+                      <th>Estado</th><th>Tipo</th><th>Visible</th><th>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -437,14 +423,11 @@ export default function AdminPanel({ onLogout }) {
                         <td>
                           <img
                             src={p.image_url || 'https://images.unsplash.com/photo-1560184897-ae75f418493e?w=80'}
-                            alt={p.title}
-                            className="admin-table__thumb"
-                            loading="lazy"
+                            alt={p.title} className="admin-table__thumb" loading="lazy"
                           />
                         </td>
                         <td>
-                          <strong className="admin-table__name">{p.title}</strong>
-                          <br />
+                          <strong className="admin-table__name">{p.title}</strong><br />
                           <span className="admin-table__sub">{p.location}</span>
                         </td>
                         <td>
@@ -465,44 +448,31 @@ export default function AdminPanel({ onLogout }) {
                         </td>
                         <td>
                           <div className="admin-table__actions">
-                            <button
-                              className="admin-btn-icon"
-                              title="Editar"
-                              aria-label={`Editar ${p.title}`}
-                              onClick={() => setModal({ type: 'edit-property', data: p })}
-                            >✏️</button>
-                            <button
-                              className="admin-btn-icon admin-btn-icon--del"
-                              title="Eliminar"
-                              aria-label={`Eliminar ${p.title}`}
-                              onClick={() => deleteProperty(p.id)}
-                            >🗑️</button>
+                            <button className="admin-btn-icon" title="Editar"
+                              onClick={() => setModal({ type: 'edit-property', data: p })}>✏️</button>
+                            <button className="admin-btn-icon admin-btn-icon--del" title="Eliminar"
+                              onClick={() => deleteProperty(p.id)}>🗑️</button>
                           </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {properties.length === 0 && (
-                  <p className="admin-empty">No hay propiedades aún.</p>
-                )}
+                {properties.length === 0 && <p className="admin-empty">No hay propiedades aún.</p>}
               </div>
             )}
           </section>
         )}
 
-        {/* ── Agents Tab ─────────────────────────────────────────────────── */}
+        {/* ── Agents ───────────────────────────────────────────────────── */}
         {tab === 'agents' && (
-          <section aria-labelledby="agents-tab-title">
+          <section>
             <div className="admin-section-header">
               <div>
-                <h1 className="admin-section-title" id="agents-tab-title">Asesores</h1>
+                <h1 className="admin-section-title">Asesores</h1>
                 <p className="admin-section-sub">{agents.length} registrados</p>
               </div>
-              <button
-                className="btn btn-primary"
-                onClick={() => setModal({ type: 'new-agent' })}
-              >
+              <button className="btn btn-primary" onClick={() => setModal({ type: 'new-agent' })}>
                 + Nuevo asesor
               </button>
             </div>
@@ -512,9 +482,7 @@ export default function AdminPanel({ onLogout }) {
                 <div key={a.id} className={`admin-agent-card${a.active ? '' : ' inactive'}`}>
                   <img
                     src={a.image_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(a.name)}&background=1A6FCC&color=fff&size=80`}
-                    alt={a.name}
-                    className="admin-agent-avatar"
-                    loading="lazy"
+                    alt={a.name} className="admin-agent-avatar" loading="lazy"
                   />
                   <div className="admin-agent-info">
                     <strong>{a.name}</strong>
@@ -522,16 +490,10 @@ export default function AdminPanel({ onLogout }) {
                     <span className="admin-agent-contact">{a.phone || a.email}</span>
                   </div>
                   <div className="admin-agent-actions">
-                    <button
-                      className="admin-btn-icon"
-                      onClick={() => setModal({ type: 'edit-agent', data: a })}
-                      aria-label={`Editar ${a.name}`}
-                    >✏️</button>
-                    <button
-                      className="admin-btn-icon admin-btn-icon--del"
-                      onClick={() => deleteAgent(a.id)}
-                      aria-label={`Desactivar ${a.name}`}
-                    >🗑️</button>
+                    <button className="admin-btn-icon"
+                      onClick={() => setModal({ type: 'edit-agent', data: a })}>✏️</button>
+                    <button className="admin-btn-icon admin-btn-icon--del"
+                      onClick={() => deleteAgent(a.id)}>🗑️</button>
                   </div>
                 </div>
               ))}
@@ -540,12 +502,12 @@ export default function AdminPanel({ onLogout }) {
           </section>
         )}
 
-        {/* ── Leads Tab ──────────────────────────────────────────────────── */}
+        {/* ── Leads ────────────────────────────────────────────────────── */}
         {tab === 'leads' && (
-          <section aria-labelledby="leads-tab-title">
+          <section>
             <div className="admin-section-header">
               <div>
-                <h1 className="admin-section-title" id="leads-tab-title">Mensajes</h1>
+                <h1 className="admin-section-title">Mensajes</h1>
                 <p className="admin-section-sub">
                   {unreadCount > 0
                     ? `${unreadCount} sin leer de ${leads.length} total`
@@ -558,21 +520,15 @@ export default function AdminPanel({ onLogout }) {
               <table className="admin-table" aria-label="Lista de mensajes">
                 <thead>
                   <tr>
-                    <th>Nombre</th>
-                    <th>Teléfono</th>
-                    <th>Correo</th>
-                    <th>Mensaje</th>
-                    <th>Fecha</th>
-                    <th>Leído</th>
+                    <th>Nombre</th><th>Teléfono</th><th>Correo</th>
+                    <th>Mensaje</th><th>Fecha</th><th>Estado</th>
                   </tr>
                 </thead>
                 <tbody>
                   {leads.map(l => (
                     <tr key={l.id} className={l.read ? '' : 'admin-table__row--unread'}>
                       <td><strong>{l.name}</strong></td>
-                      <td>
-                        <a href={`tel:${l.phone}`} className="admin-link">{l.phone}</a>
-                      </td>
+                      <td><a href={`tel:${l.phone}`} className="admin-link">{l.phone}</a></td>
                       <td>
                         {l.email
                           ? <a href={`mailto:${l.email}`} className="admin-link">{l.email}</a>
@@ -585,17 +541,10 @@ export default function AdminPanel({ onLogout }) {
                         })}
                       </td>
                       <td>
-                        {l.read ? (
-                          <span className="admin-badge admin-badge--active">Leído</span>
-                        ) : (
-                          <button
-                            className="admin-badge admin-badge--unread"
-                            onClick={() => markRead(l.id)}
-                            aria-label="Marcar como leído"
-                          >
-                            Marcar leído
-                          </button>
-                        )}
+                        {l.read
+                          ? <span className="admin-badge admin-badge--active">Leído</span>
+                          : <button className="admin-badge admin-badge--unread"
+                              onClick={() => markRead(l.id)}>Marcar leído</button>}
                       </td>
                     </tr>
                   ))}
@@ -607,7 +556,7 @@ export default function AdminPanel({ onLogout }) {
         )}
       </main>
 
-      {/* ── Modals ─────────────────────────────────────────────────────────── */}
+      {/* ── Modals ───────────────────────────────────────────────────────── */}
       {modal?.type === 'new-property' && (
         <Modal title="Nueva propiedad" onClose={() => setModal(null)}>
           <PropertyForm onSave={saveProperty} onCancel={() => setModal(null)} loading={saving} />
@@ -629,31 +578,23 @@ export default function AdminPanel({ onLogout }) {
         </Modal>
       )}
 
-      {/* ── Confirm dialog ─────────────────────────────────────────────────── */}
+      {/* ── Confirm ──────────────────────────────────────────────────────── */}
       {confirm && (
-        <div className="modal-overlay" role="alertdialog" aria-modal="true" aria-label="Confirmación">
+        <div className="modal-overlay" role="alertdialog" aria-modal="true">
           <div className="modal-box modal-box--sm">
             <p className="confirm-msg">{confirm.msg}</p>
             <div className="confirm-actions">
               <button className="btn btn-outline-dark" onClick={() => setConfirm(null)}>Cancelar</button>
-              <button
-                className="btn btn-danger"
-                onClick={() => { confirm.onOk(); setConfirm(null) }}
-              >
-                Confirmar
-              </button>
+              <button className="btn btn-danger"
+                onClick={() => { confirm.onOk(); setConfirm(null) }}>Confirmar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Toast ──────────────────────────────────────────────────────────── */}
+      {/* ── Toast ────────────────────────────────────────────────────────── */}
       {toast && (
-        <div
-          className={`admin-toast${toast.ok ? ' ok' : ' err'}`}
-          role="status"
-          aria-live="polite"
-        >
+        <div className={`admin-toast${toast.ok ? ' ok' : ' err'}`} role="status" aria-live="polite">
           {toast.ok ? '✓' : '✗'} {toast.msg}
         </div>
       )}

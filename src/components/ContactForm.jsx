@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './ContactForm.css'
 
-export default function ContactForm() {
+export default function ContactForm({ apiBase = '' }) {
   const [form, setForm]       = useState({ name: '', phone: '', email: '', message: '' })
   const [errors, setErrors]   = useState({})
   const [status, setStatus]   = useState(null) // null | 'sending' | 'success' | 'error'
@@ -9,11 +9,11 @@ export default function ContactForm() {
 
   // Fetch CSRF token on mount
   useEffect(() => {
-    fetch('/api/csrf-token', { credentials: 'include' })
+    fetch(`${apiBase}/api/csrf-token`, { credentials: 'include' })
       .then(r => r.json())
       .then(d => setCsrf(d.csrf_token))
       .catch(() => {})
-  }, [])
+  }, [apiBase])
 
   // ─── Frontend Validation ──────────────────────────────────────────────────
   function validate() {
@@ -45,7 +45,7 @@ export default function ContactForm() {
 
     setStatus('sending')
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(`${apiBase}/api/contact`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -57,7 +57,7 @@ export default function ContactForm() {
         setStatus('success')
         setForm({ name: '', phone: '', email: '', message: '' })
         // Re-fetch CSRF for next submission
-        fetch('/api/csrf-token', { credentials: 'include' })
+        fetch(`${apiBase}/api/csrf-token`, { credentials: 'include' })
           .then(r => r.json()).then(d => setCsrf(d.csrf_token)).catch(() => {})
       } else {
         setStatus('error')

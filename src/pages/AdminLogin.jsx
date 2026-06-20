@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import './AdminLogin.css'
 
-export default function AdminLogin({ onSuccess, onCancel }) {
-  const [form, setForm]     = useState({ username: '', password: '' })
-  const [error, setError]   = useState('')
-  const [loading, setLoading] = useState(false)
+export default function AdminLogin({ onSuccess, onCancel, apiBase = '' }) {
+  const [form, setForm]         = useState({ username: '', password: '' })
+  const [error, setError]       = useState('')
+  const [loading, setLoading]   = useState(false)
   const [attempts, setAttempts] = useState(0)
 
   const handleChange = (e) => {
@@ -27,7 +27,7 @@ export default function AdminLogin({ onSuccess, onCancel }) {
     setError('')
 
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch(`${apiBase}/api/admin/login`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -43,7 +43,7 @@ export default function AdminLogin({ onSuccess, onCancel }) {
         setForm(f => ({ ...f, password: '' }))
       }
     } catch {
-      setError('Error de conexión. Intenta de nuevo.')
+      setError('Error de conexión. Verifica que el backend esté activo.')
     } finally {
       setLoading(false)
     }
@@ -52,7 +52,6 @@ export default function AdminLogin({ onSuccess, onCancel }) {
   return (
     <div className="admin-login" role="main">
       <div className="admin-login__card">
-        {/* Header */}
         <div className="admin-login__header">
           <div className="admin-login__logo">
             <span className="logo-mark">INMOVA</span>
@@ -66,7 +65,6 @@ export default function AdminLogin({ onSuccess, onCancel }) {
           Esta área es exclusiva para administradores autorizados.
         </p>
 
-        {/* Attempts warning */}
         {attempts >= 3 && attempts < 5 && (
           <div className="admin-login__warning" role="alert">
             ⚠️ {5 - attempts} intento(s) restante(s) antes del bloqueo temporal.
@@ -74,16 +72,12 @@ export default function AdminLogin({ onSuccess, onCancel }) {
         )}
 
         {error && (
-          <div className="admin-login__error" role="alert">
-            {error}
-          </div>
+          <div className="admin-login__error" role="alert">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} noValidate aria-label="Formulario de acceso">
           <div className="admin-login__group">
-            <label htmlFor="al-username" className="admin-login__label">
-              Usuario
-            </label>
+            <label htmlFor="al-username" className="admin-login__label">Usuario</label>
             <input
               id="al-username"
               name="username"
@@ -96,14 +90,11 @@ export default function AdminLogin({ onSuccess, onCancel }) {
               autoFocus
               required
               disabled={attempts >= 5}
-              aria-required="true"
             />
           </div>
 
           <div className="admin-login__group">
-            <label htmlFor="al-password" className="admin-login__label">
-              Contraseña
-            </label>
+            <label htmlFor="al-password" className="admin-login__label">Contraseña</label>
             <input
               id="al-password"
               name="password"
@@ -115,7 +106,6 @@ export default function AdminLogin({ onSuccess, onCancel }) {
               autoComplete="current-password"
               required
               disabled={attempts >= 5}
-              aria-required="true"
             />
           </div>
 
@@ -125,9 +115,9 @@ export default function AdminLogin({ onSuccess, onCancel }) {
             disabled={loading || attempts >= 5}
             aria-busy={loading}
           >
-            {loading ? (
-              <><span className="spinner" aria-hidden="true" /> Verificando…</>
-            ) : 'Ingresar'}
+            {loading
+              ? <><span className="spinner" aria-hidden="true" /> Verificando…</>
+              : 'Ingresar'}
           </button>
         </form>
 
