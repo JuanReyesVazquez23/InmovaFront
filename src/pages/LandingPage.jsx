@@ -95,16 +95,49 @@ const CHANNELS = [
 ]
 
 /* ─── Helpers ───────────────────────────────────────────── */
+/* Flexible search:
+   - Splits query into individual words and checks each word independently
+   - A result shows if ANY word matches (OR logic = more open results)
+   - Also checks price range when query contains a number
+   - Synonyms: "apto" => "apartamento", "piscina" etc.
+*/
+const SYNONYMS = {
+  'apto': 'apartamento', 'depto': 'apartamento', 'dept': 'apartamento',
+  'hab': 'habitacion', 'cuarto': 'habitacion',
+  'local': 'local comercial', 'oficina': 'oficina',
+  'villa': 'villa', 'casa': 'casa',
+  'sd': 'santo domingo', 'dn': 'distrito nacional',
+}
+
 function matchesSearch(prop, query, tipo) {
   if (tipo !== 'todos' && prop.status !== tipo) return false
   if (!query.trim()) return true
-  const q = query.toLowerCase()
-  return (
-    prop.title?.toLowerCase().includes(q) ||
-    prop.location?.toLowerCase().includes(q) ||
-    prop.type?.toLowerCase().includes(q) ||
-    prop.description?.toLowerCase().includes(q)
-  )
+
+  const raw = query.toLowerCase().trim()
+  const words = raw.split(/\s+/).map(w => SYNONYMS[w] || w)
+
+  // Search fields to check (all lowercased)
+  const fields = [
+    prop.title?.toLowerCase() || '',
+    prop.location?.toLowerCase() || '',
+    prop.type?.toLowerCase() || '',
+    prop.description?.toLowerCase() || '',
+    prop.status?.toLowerCase() || '',
+    prop.currency?.toLowerCase() || '',
+  ].join(' ')
+
+  // Price range check: if query contains a number, match properties within 20% of that value
+  const numInQuery = parseFloat(raw.replace(/[^0-9.]/g, ''))
+  if (!isNaN(numInQuery) && numInQuery > 0 && prop.price) {
+    const price = parseFloat(prop.price)
+    const margin = numInQuery * 0.3  // 30% margin
+    if (price >= numInQuery - margin && price <= numInQuery + margin) {
+      return true
+    }
+  }
+
+  // OR logic: show result if ANY word matches any field
+  return words.some(word => word.length >= 2 && fields.includes(word))
 }
 
 /* ─── Component ─────────────────────────────────────────── */
@@ -118,19 +151,22 @@ export default function LandingPage({ onSecretFooterTap }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchActive, setSearchActive] = useState(false)
 
+  const [siteImages, setSiteImages] = useState({})
   const [footerTaps, setFooterTaps] = useState(0)
   const tapTimer                    = useRef(null)
   const propsRef                    = useRef(null)
 
-  /* Fetch */
+  /* Fetch all data including site images */
   useEffect(() => {
     Promise.all([
       fetch(`${API}/api/properties`).then(r => r.json()),
       fetch(`${API}/api/agents`).then(r => r.json()),
+      fetch(`${API}/api/site-images`).then(r => r.json()),
     ])
-      .then(([props, agts]) => {
+      .then(([props, agts, imgs]) => {
         setAllProps(Array.isArray(props) ? props : [])
         setAgents(Array.isArray(agts) ? agts : [])
+        if (imgs && typeof imgs === 'object') setSiteImages(imgs)
       })
       .catch(() => { setAllProps([]); setAgents([]) })
       .finally(() => setLoading(false))
@@ -168,8 +204,8 @@ export default function LandingPage({ onSecretFooterTap }) {
     <>
       <Navbar />
 
-      {/* Hero — passes search callback */}
-      <Hero onSearch={handleSearch} />
+      {/* Hero — passes search callback and dynamic page images */}
+      <Hero onSearch={handleSearch} siteImages={siteImages} />
 
       {/* Stats bar */}
       <section className="statsbar" aria-label="Cifras de Inmova">
@@ -265,7 +301,7 @@ export default function LandingPage({ onSecretFooterTap }) {
         <div className="container about-grid">
           <div>
             <div className="about-img-wrap">
-              <img src="/interior-living.jpg"
+              <img src={siteImages.about?.image_url || "/interior-living.jpg"}
                 alt="Interior de propiedad residencial de lujo en Santo Domingo"
                 className="about-img"
                 loading="lazy"
@@ -320,7 +356,7 @@ export default function LandingPage({ onSecretFooterTap }) {
             <a href="#propiedades" className="btn btn-white">Ver portafolio</a>
           </div>
           <div className="showcase__img-wrap">
-            <img src="/interior-dining.png"
+            <img src={siteImages.showcase?.image_url || "/interior-dining.png"}
               alt="Comedor de residencia exclusiva en Santo Domingo"
               className="showcase__img"
               loading="lazy"

@@ -66,6 +66,9 @@
 .ap__nav-btn:hover { background: rgba(255,255,255,.08); color: var(--white); }
 .ap__nav-btn--active { background: var(--blue); color: var(--white); }
 
+.ap__nav-icon  { font-size: 1rem; flex-shrink: 0; }
+.ap__nav-label { flex: 1; }
+
 .ap__badge {
   margin-left: auto;
   background: #EF4444;
@@ -379,6 +382,62 @@
 /* Confirm */
 .confirm__msg { font-size: .92rem; color: var(--gray-800); margin-bottom: 1.5rem; line-height: 1.6; }
 .confirm__actions { display: flex; gap: .65rem; justify-content: flex-end; }
+
+/* ── Site Images tab ─────────────────────────────────────── */
+.siteimg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.siteimg-card {
+  background: var(--white);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--g200);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  box-shadow: var(--sh-xs);
+}
+.siteimg-label {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.siteimg-preview {
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 1px solid var(--g100);
+}
+.siteimg-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  display: block;
+}
+.siteimg-saving {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .78rem;
+  color: var(--blue);
+}
+.siteimg-remove {
+  font-size: .74rem;
+  color: var(--g400);
+  cursor: pointer;
+  border: none;
+  background: none;
+  text-align: left;
+  padding: 0;
+  transition: color var(--t);
+  text-decoration: underline;
+}
+.siteimg-remove:hover { color: var(--danger); }
+
+@media (max-width: 480px) {
+  .siteimg-grid { grid-template-columns: 1fr; }
+}
 
 /* ── Toast ───────────────────────────────────────────────── */
 .toast {

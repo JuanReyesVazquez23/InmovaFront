@@ -1,21 +1,28 @@
 import { useState, useEffect } from 'react'
 import './Hero.css'
 
-const SLIDES = [
+const DEFAULT_SLIDES = [
   { src: '/hero-city.jpg',  alt: 'Vista aérea de Santo Domingo' },
   { src: '/hero-city2.jpg', alt: 'Skyline de Santo Domingo' },
   { src: '/hero-city3.jpg', alt: 'Santo Domingo al atardecer' },
 ]
 
-export default function Hero({ onSearch }) {
+export default function Hero({ onSearch, siteImages = {} }) {
+  // Use DB images if available, fall back to local files
+  const slides = [
+    { src: siteImages.hero1?.image_url || DEFAULT_SLIDES[0].src, alt: 'Vista aérea de Santo Domingo' },
+    { src: siteImages.hero2?.image_url || DEFAULT_SLIDES[1].src, alt: 'Skyline de Santo Domingo' },
+    { src: siteImages.hero3?.image_url || DEFAULT_SLIDES[2].src, alt: 'Santo Domingo al atardecer' },
+  ]
+
   const [active, setActive]   = useState(0)
   const [tipo, setTipo]       = useState('venta')
   const [query, setQuery]     = useState('')
 
   useEffect(() => {
-    const id = setInterval(() => setActive(i => (i + 1) % SLIDES.length), 6000)
+    const id = setInterval(() => setActive(i => (i + 1) % slides.length), 6000)
     return () => clearInterval(id)
-  }, [])
+  }, [slides.length])
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -25,10 +32,9 @@ export default function Hero({ onSearch }) {
 
   return (
     <section className="hero" id="inicio" aria-label="Encabezado principal">
-      {/* Slides — GPU-isolated to prevent shake on Android */}
       <div className="hero__bg" aria-hidden="true">
-        {SLIDES.map((s, i) => (
-          <div key={s.src}
+        {slides.map((s, i) => (
+          <div key={i}
             className={`hero__slide${i === active ? ' hero__slide--on' : ''}`}
             style={{ backgroundImage: `url(${s.src})` }}
           />
@@ -37,17 +43,18 @@ export default function Hero({ onSearch }) {
       </div>
 
       <div className="hero__body container">
-        {/* Left column — headline */}
         <div className="hero__left anim-up">
-          <p className="eyebrow eyebrow--light">Gran Santo Domingo &middot; Rep&uacute;blica Dominicana</p>
+          <p className="eyebrow eyebrow--light">
+            Gran Santo Domingo &middot; Rep&uacute;blica Dominicana
+          </p>
           <h1 className="h-xl">
             Encuentra tu<br />
             <em>propiedad ideal</em><br />
             en la capital
           </h1>
           <p className="body-lg body-lg--white" style={{ marginBlock: '1.25rem 2rem' }}>
-            Apartamentos, casas y villas en venta y alquiler en el Gran Santo Domingo.
-            Asesores certificados que te acompa&ntilde;an en cada paso del proceso.
+            Apartamentos, casas y villas en venta y alquiler.
+            Asesores certificados que te acompa&ntilde;an en cada paso.
           </p>
           <div className="hero__btns">
             <a href="https://wa.me/18090000000?text=Hola,%20quiero%20informaci%C3%B3n%20sobre%20propiedades"
@@ -59,23 +66,18 @@ export default function Hero({ onSearch }) {
           </div>
         </div>
 
-        {/* Right column — search card */}
         <div className="hero__card anim-up d2" role="search" aria-label="Buscar propiedades">
           <p className="hero__card-title">Busca tu pr&oacute;xima inversi&oacute;n</p>
 
           <div className="hero__tabs" role="group" aria-label="Tipo de operaci&oacute;n">
-            <button
-              className={`hero__tab${tipo === 'venta' ? ' hero__tab--on' : ''}`}
-              onClick={() => setTipo('venta')}
-              aria-pressed={tipo === 'venta'}>
-              Comprar
-            </button>
-            <button
-              className={`hero__tab${tipo === 'alquiler' ? ' hero__tab--on' : ''}`}
-              onClick={() => setTipo('alquiler')}
-              aria-pressed={tipo === 'alquiler'}>
-              Alquilar
-            </button>
+            {[{ k: 'venta', l: 'Comprar' }, { k: 'alquiler', l: 'Alquilar' }].map(t => (
+              <button key={t.k}
+                className={`hero__tab${tipo === t.k ? ' hero__tab--on' : ''}`}
+                onClick={() => setTipo(t.k)}
+                aria-pressed={tipo === t.k}>
+                {t.l}
+              </button>
+            ))}
           </div>
 
           <form onSubmit={handleSearch} className="hero__form">
@@ -87,14 +89,14 @@ export default function Hero({ onSearch }) {
               <input
                 type="search"
                 className="hero__input"
-                placeholder="Sector, tipo de propiedad, precio…"
+                placeholder="Sector, tipo, precio aproximado…"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                aria-label="Buscar"
+                aria-label="Buscar propiedades"
               />
               {query && (
                 <button type="button" className="hero__clear"
-                  onClick={() => setQuery('')} aria-label="Limpiar búsqueda">
+                  onClick={() => setQuery('')} aria-label="Limpiar">
                   &#x2715;
                 </button>
               )}
@@ -119,9 +121,8 @@ export default function Hero({ onSearch }) {
         </div>
       </div>
 
-      {/* Slide dots */}
-      <div className="hero__dots" aria-label="Indicadores de imagen" role="group">
-        {SLIDES.map((_, i) => (
+      <div className="hero__dots" aria-label="Indicadores" role="group">
+        {slides.map((_, i) => (
           <button key={i}
             className={`hero__dot${i === active ? ' hero__dot--on' : ''}`}
             onClick={() => setActive(i)}
@@ -131,7 +132,6 @@ export default function Hero({ onSearch }) {
         ))}
       </div>
 
-      {/* Scroll hint */}
       <div className="hero__scroll" aria-hidden="true">
         <span className="hero__arrow" />
       </div>
