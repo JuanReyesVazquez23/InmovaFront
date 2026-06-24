@@ -1,25 +1,27 @@
-/* ── ImagePicker ─────────────────────────────────────────── */
-.imgpicker {
-  display: flex;
-  flex-direction: column;
-  gap: .4rem;
-}
+/* ══════════════════════════════════════════════════════════
+   ImagePicker v2 — Galería + CropperJS
+   Incluye: botón de selección, preview, overlay, modal de recorte
+══════════════════════════════════════════════════════════ */
 
-/* Upload button (no image yet) */
+/* ── Hidden native file input ──────────────────────────── */
+.imgpicker { display: flex; flex-direction: column; gap: .5rem; }
+
 .imgpicker__input {
   position: absolute;
   width: 1px; height: 1px;
   opacity: 0;
   pointer-events: none;
+  overflow: hidden;
 }
 
+/* ── Upload button (no image) ───────────────────────────── */
 .imgpicker__btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: .6rem;
   width: 100%;
-  padding: .85rem 1rem;
+  padding: .9rem 1rem;
   border: 2px dashed var(--g200);
   border-radius: var(--r-lg);
   background: var(--off-white);
@@ -35,32 +37,35 @@
   color: var(--blue);
 }
 .imgpicker__btn:disabled {
-  opacity: .6;
+  opacity: .55;
   cursor: not-allowed;
 }
 
-/* Preview with hover overlay */
+/* ── Image preview with hover overlay ──────────────────── */
 .imgpicker__preview {
   position: relative;
   border-radius: var(--r-lg);
   overflow: hidden;
   border: 2px solid var(--g200);
+  background: var(--g100);
   line-height: 0;
 }
 .imgpicker__preview--round {
   border-radius: 50%;
-  width: 90px;
-  height: 90px;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
 }
+
 .imgpicker__img {
   width: 100%;
-  max-height: 180px;
+  height: 160px;
   object-fit: cover;
   display: block;
 }
 .imgpicker__img--round {
-  width: 90px;
-  height: 90px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -68,7 +73,7 @@
 .imgpicker__overlay {
   position: absolute;
   inset: 0;
-  background: rgba(11,23,40,.65);
+  background: rgba(11,23,40,.68);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,16 +81,17 @@
   opacity: 0;
   transition: opacity var(--t);
 }
-.imgpicker__preview:hover .imgpicker__overlay,
-.imgpicker__preview--round:hover .imgpicker__overlay {
-  opacity: 1;
+.imgpicker__preview:hover .imgpicker__overlay { opacity: 1; }
+/* Always show overlay on touch devices (no hover) */
+@media (hover: none) {
+  .imgpicker__overlay { opacity: 1; }
 }
 
 .imgpicker__change,
-.imgpicker__remove {
-  padding: .38rem .85rem;
+.imgpicker__remove-btn {
+  padding: .4rem .9rem;
   border-radius: var(--r-pill);
-  font-size: .75rem;
+  font-size: .76rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
@@ -96,33 +102,167 @@
   color: #fff;
 }
 .imgpicker__change:hover:not(:disabled) { background: var(--blue-2); }
-.imgpicker__remove {
-  background: rgba(255,255,255,.2);
+.imgpicker__remove-btn {
+  background: rgba(255,255,255,.15);
   color: #fff;
-  border: 1px solid rgba(255,255,255,.35);
+  border: 1px solid rgba(255,255,255,.3);
 }
-.imgpicker__remove:hover:not(:disabled) { background: rgba(220,38,38,.8); }
+.imgpicker__remove-btn:hover:not(:disabled) { background: rgba(220,38,38,.75); }
 
-/* Error */
+/* ── Error and hint ──────────────────────────────────────── */
 .imgpicker__err {
   font-size: .74rem;
   color: var(--danger);
   font-weight: 500;
+  line-height: 1.4;
 }
-
-/* Hint */
 .imgpicker__hint {
   font-size: .7rem;
   color: var(--g400);
 }
 
-/* Spinner */
+/* ── Spinner (shared with AdminPanel) ───────────────────── */
 .imgpicker__spin {
   display: inline-block;
   width: 14px; height: 14px;
-  border: 2px solid rgba(20,87,184,.25);
-  border-top-color: var(--blue);
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff;
   border-radius: 50%;
-  animation: imgPickerSpin .7s linear infinite;
+  animation: pickerSpin .7s linear infinite;
+  vertical-align: middle;
 }
-@keyframes imgPickerSpin { to { transform: rotate(360deg); } }
+@keyframes pickerSpin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════════════════
+   Crop Modal — full-screen on mobile
+══════════════════════════════════════════════════════════ */
+.crop-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(11,23,40,.82);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .75rem;
+}
+
+.crop-modal__box {
+  background: var(--white);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 560px;
+  max-height: 96dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0,0,0,.4);
+}
+
+.crop-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--g100);
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  z-index: 1;
+}
+.crop-modal__title {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.crop-modal__close {
+  color: var(--g400);
+  font-size: 1.1rem;
+  padding: .3rem .6rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: background var(--t), color var(--t);
+  flex-shrink: 0;
+}
+.crop-modal__close:hover:not(:disabled) {
+  background: var(--g100);
+  color: var(--black);
+}
+
+/* CropperJS canvas container */
+.crop-modal__canvas {
+  padding: .75rem;
+  background: #1a1a1a;
+  /* Let CropperJS fill this container */
+  max-height: 55dvh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Override CropperJS container to fit our layout */
+.crop-modal__canvas .cropper-container {
+  max-height: 55dvh !important;
+}
+
+/* Rotation toolbar */
+.crop-modal__tools {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--g100);
+}
+.crop-tool-btn {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--g200);
+  background: var(--white);
+  color: var(--g600);
+  cursor: pointer;
+  transition: border-color var(--t), background var(--t), color var(--t);
+  flex-shrink: 0;
+}
+.crop-tool-btn:hover:not(:disabled) {
+  border-color: var(--blue);
+  background: var(--blue-pale);
+  color: var(--blue);
+}
+.crop-tool-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.crop-modal__tip {
+  font-size: .72rem;
+  color: var(--g400);
+  text-align: center;
+  padding: .5rem 1rem;
+}
+
+.crop-modal__actions {
+  display: flex;
+  gap: .65rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--g100);
+  position: sticky;
+  bottom: 0;
+  background: var(--white);
+}
+.crop-modal__actions .btn-outline,
+.crop-modal__actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* ── Mobile adjustments ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .crop-modal { padding: .5rem; }
+  .crop-modal__box { max-height: 100dvh; border-radius: var(--r-lg); }
+  .crop-modal__canvas { max-height: 48dvh; }
+  .crop-modal__canvas .cropper-container { max-height: 48dvh !important; }
+}

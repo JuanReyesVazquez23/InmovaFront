@@ -1,19 +1,51 @@
 import { useState, useEffect } from 'react'
-import LandingPage from './pages/LandingPage.jsx'
-import AdminPanel from './pages/AdminPanel.jsx'
-import AdminLogin from './pages/AdminLogin.jsx'
+import LandingPage  from './pages/LandingPage.jsx'
+import AdminPanel   from './pages/AdminPanel.jsx'
+import AdminLogin   from './pages/AdminLogin.jsx'
 
-/* Backend URL from env — set VITE_API_URL in Railway frontend variables */
-const API = import.meta.env.VITE_API_URL || ''
+/*
+ * CRITICAL: VITE_API_URL must be set in Railway frontend env variables.
+ * Without it, all API calls go to the frontend server (returns HTML, not JSON).
+ *
+ * Railway setup:
+ *   Service: frontend
+ *   Variables: VITE_API_URL = https://your-backend.up.railway.app
+ *
+ * The || '' fallback only works in LOCAL dev (Vite proxy handles /api).
+ * In production, VITE_API_URL must be explicitly set.
+ */
+const API = import.meta.env.VITE_API_URL?.replace(/\/$/, '') || ''
+
+// Warn in dev if API URL is missing in production context
+if (!API && typeof window !== 'undefined') {
+  const isLocalhost = window.location.hostname === 'localhost' ||
+                      window.location.hostname === '127.0.0.1'
+  if (!isLocalhost) {
+    console.warn(
+      '[Inmova] VITE_API_URL is not set. ' +
+      'Set it in Railway frontend environment variables. ' +
+      'API calls will fail in production.'
+    )
+  }
+}
 
 export default function App() {
-  const [view, setView]       = useState('landing')
+  const [view, setView]           = useState('landing')
   const [adminAuth, setAdminAuth] = useState(false)
 
+  // Check if admin session is still alive on page load
   useEffect(() => {
     fetch(`${API}/api/admin/check`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(d => { if (d.authenticated) { setAdminAuth(true); setView('admin') } })
+      .then(r => {
+        if (!r.ok) return null
+        return r.json()
+      })
+      .then(d => {
+        if (d?.authenticated) {
+          setAdminAuth(true)
+          setView('admin')
+        }
+      })
       .catch(() => {})
   }, [])
 
@@ -23,7 +55,12 @@ export default function App() {
   }
 
   const handleLogout = async () => {
-    await fetch(`${API}/api/admin/logout`, { method: 'POST', credentials: 'include' })
+    try {
+      await fetch(`${API}/api/admin/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch (_) { /* ignore */ }
     setAdminAuth(false)
     setView('landing')
   }
