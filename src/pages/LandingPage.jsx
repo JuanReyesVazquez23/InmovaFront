@@ -53,11 +53,28 @@ const IconMail   = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="
 const IconPin    = () => (<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>)
 
 /* ── Static content ─────────────────────────────────────── */
-const STATS = [
-  { val: '+500',   lbl: 'Propiedades vendidas' },
-  { val: '+10',    lbl: 'Años de experiencia'  },
-  { val: '+1,200', lbl: 'Clientes satisfechos' },
-  { val: '100%',   lbl: 'Transparencia'        },
+/* Trust band items — specific, credible, not generic */
+const TRUST_ITEMS = [
+  {
+    Icon: IconShield,
+    val: 'Compra segura',
+    lbl: 'Revisión jurídica incluida en cada transacción',
+  },
+  {
+    Icon: IconUsers,
+    val: '+1,200 familias',
+    lbl: 'Han confiado en Inmova para encontrar su hogar',
+  },
+  {
+    Icon: IconKey,
+    val: 'Santo Domingo',
+    lbl: 'Expertos en el mercado del Gran Santo Domingo',
+  },
+  {
+    Icon: IconCash,
+    val: 'Financiamiento',
+    lbl: 'Te conectamos con las mejores opciones bancarias',
+  },
 ]
 
 const BENEFITS = [
@@ -207,17 +224,22 @@ export default function LandingPage({ onSecretFooterTap }) {
       {/* Hero — passes search callback and dynamic page images */}
       <Hero onSearch={handleSearch} siteImages={siteImages} />
 
-      {/* Stats bar */}
-      <section className="statsbar" aria-label="Cifras de Inmova">
-        <div className="statsbar__grid container">
-          {STATS.map(s => (
-            <div key={s.lbl} className="statsbar__item">
-              <span className="statsbar__val">{s.val}</span>
-              <span className="statsbar__lbl">{s.lbl}</span>
+      {/* Trust band — replaces generic stats */}
+      <div className="trust-band" aria-label="Por qué elegir Inmova">
+        <div className="trust-band__inner container">
+          {TRUST_ITEMS.map(item => (
+            <div key={item.val} className="trust-item">
+              <div className="trust-item__icon" aria-hidden="true">
+                <item.Icon />
+              </div>
+              <div className="trust-item__body">
+                <span className="trust-item__val">{item.val}</span>
+                <span className="trust-item__lbl">{item.lbl}</span>
+              </div>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
       {/* Properties */}
       <section className="section" id="propiedades" aria-labelledby="props-h" ref={propsRef}>
