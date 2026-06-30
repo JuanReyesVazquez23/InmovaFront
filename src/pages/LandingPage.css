@@ -2,69 +2,121 @@
    Amplia · Limpia · Premium
 ═══════════════════════════════════════════════════════════ */
 
-/* ── Trust band (reemplaza statsbar genérico) ────────────── */
+/* ── Trust band ──────────────────────────────────────────── */
 .trust-band {
   background: var(--navy-2);
   border-top: 1px solid rgba(255,255,255,.06);
   border-bottom: 1px solid rgba(255,255,255,.06);
-  padding: 0;
+  /* Hard clip — nothing escapes horizontally */
   overflow: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 .trust-band__inner {
   display: grid;
+  /* 4 columns on desktop, collapses below */
   grid-template-columns: repeat(4, 1fr);
+  width: 100%;
 }
 .trust-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.6rem 2rem;
+  /* Smaller gap on tight screens */
+  gap: clamp(.5rem, 1.5vw, 1rem);
+  padding: clamp(.9rem, 2vw, 1.5rem) clamp(.75rem, 2vw, 1.5rem);
   border-right: 1px solid rgba(255,255,255,.07);
   text-decoration: none;
   transition: background var(--t);
+  /* Prevent item from growing wider than its column */
+  min-width: 0;
+  overflow: hidden;
 }
 .trust-item:last-child { border-right: none; }
 .trust-item:hover { background: rgba(255,255,255,.04); }
 
 .trust-item__icon {
-  width: 44px;
-  height: 44px;
+  /* Icon scales with viewport */
+  width: clamp(32px, 4vw, 42px);
+  height: clamp(32px, 4vw, 42px);
   border-radius: var(--r-md);
   background: rgba(8,168,196,.14);
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Never shrinks — icon always visible */
   flex-shrink: 0;
   color: var(--accent);
 }
-.trust-item__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.trust-item__val {
-  font-family: var(--serif);
-  font-size: 1.45rem;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1;
-  letter-spacing: -.01em;
-}
-.trust-item__lbl {
-  font-size: .72rem;
-  color: rgba(255,255,255,.48);
-  letter-spacing: .04em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.trust-item__icon svg {
+  width: clamp(14px, 2vw, 18px);
+  height: clamp(14px, 2vw, 18px);
+  display: block;
+  flex-shrink: 0;
 }
 
-@media (max-width: 900px) {
-  .trust-band__inner { grid-template-columns: repeat(2, 1fr); }
-  .trust-item:nth-child(2) { border-right: none; }
-  .trust-item { padding: 1.25rem 1.5rem; }
+.trust-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Allows text to truncate instead of overflowing */
+  min-width: 0;
+  overflow: hidden;
 }
-@media (max-width: 480px) {
-  .trust-band__inner { grid-template-columns: 1fr 1fr; }
-  .trust-item { padding: 1rem 1.1rem; gap: .65rem; }
-  .trust-item__icon { width: 36px; height: 36px; }
-  .trust-item__val { font-size: 1.2rem; }
+.trust-item__val {
+  font-family: var(--serif);
+  /* Fluid — shrinks on small screens instead of overflowing */
+  font-size: clamp(.85rem, 1.8vw, 1.25rem);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  /* Allow wrapping on very small screens */
+  white-space: normal;
+  word-break: break-word;
+}
+.trust-item__lbl {
+  font-size: clamp(.58rem, 1.1vw, .7rem);
+  color: rgba(255,255,255,.48);
+  letter-spacing: .03em;
+  /* Allow wrapping — do NOT use nowrap on small screens */
+  white-space: normal;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+/* Tablet: 2×2 grid */
+@media (max-width: 840px) {
+  .trust-band__inner {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .trust-item {
+    border-right: 1px solid rgba(255,255,255,.07);
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+  /* Kill right border on 2nd and 4th items */
+  .trust-item:nth-child(2n) { border-right: none; }
+  /* Kill bottom border on last row */
+  .trust-item:nth-child(3),
+  .trust-item:nth-child(4) { border-bottom: none; }
+}
+
+/* Mobile: full-width vertical list */
+@media (max-width: 460px) {
+  .trust-band__inner {
+    grid-template-columns: 1fr;
+  }
+  .trust-item {
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    padding: .85rem 1rem;
+    gap: .85rem;
+  }
+  .trust-item:last-child { border-bottom: none; }
+  .trust-item__icon {
+    width: 36px; height: 36px;
+  }
+  .trust-item__val { font-size: 1rem; }
+  .trust-item__lbl { font-size: .72rem; }
 }
 
 /* ── Section header ──────────────────────────────────────── */

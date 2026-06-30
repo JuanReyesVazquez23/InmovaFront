@@ -1,10 +1,8 @@
 /* ═══════════════════════════════════════════════════════════
-   INMOVA — Design System v4
-   Más amplio · Más limpio · Más premium
-   Paleta: Blanco / Azul profundo / Acento cian
+   INMOVA — Design System v4.1
+   Mobile-first · Sin overflow · Premium
 ═══════════════════════════════════════════════════════════ */
 :root {
-  /* ── Palette ──────────────────────────────────────────── */
   --white:      #FFFFFF;
   --off-white:  #F5F7FA;
   --black:      #0A0A0A;
@@ -27,43 +25,40 @@
   --danger:     #DC2626;
   --success:    #16A34A;
 
-  /* ── Typography ───────────────────────────────────────── */
   --serif: 'Playfair Display', Georgia, serif;
   --sans:  'Inter', system-ui, -apple-system, sans-serif;
 
-  /* ── Spacing ──────────────────────────────────────────── */
-  --section-y: clamp(5rem, 9vw, 8rem);
+  --section-y: clamp(4rem, 8vw, 7rem);
 
-  /* ── Radius ───────────────────────────────────────────── */
   --r-sm:   6px;
   --r-md:   12px;
-  --r-lg:   20px;
-  --r-xl:   32px;
+  --r-lg:   18px;
+  --r-xl:   28px;
   --r-pill: 999px;
 
-  /* ── Shadows ──────────────────────────────────────────── */
   --sh-xs:   0 1px 3px rgba(0,0,0,.06);
   --sh-sm:   0 4px 16px rgba(0,0,0,.08);
   --sh-md:   0 8px 32px rgba(0,0,0,.11);
   --sh-lg:   0 20px 56px rgba(0,0,0,.16);
   --sh-blue: 0 6px 20px rgba(18,85,181,.32);
 
-  /* ── Motion ───────────────────────────────────────────── */
   --ease: cubic-bezier(.4,0,.2,1);
   --t:    .22s;
 
-  /* ── Layout ───────────────────────────────────────────── */
-  /* Wider container — more breathing room */
+  /* Container — amplio en desktop, con padding seguro en móvil */
   --page-max: 1280px;
-  --page-pad: clamp(1.25rem, 5vw, 3rem);
+  --page-pad: clamp(1rem, 4vw, 2.5rem);
 }
 
-/* ── Reset ──────────────────────────────────────────────── */
+/* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  /* Bloqueo total de scroll horizontal en todo el documento */
   overflow-x: hidden;
+  width: 100%;
 }
 body {
   font-family: var(--sans);
@@ -73,53 +68,56 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Nunca más ancho que la pantalla */
   max-width: 100vw;
+  width: 100%;
+  position: relative;
 }
+
 img { max-width: 100%; display: block; height: auto; }
 a { color: inherit; text-decoration: none; }
 button { cursor: pointer; border: none; background: none; font: inherit; }
 input, textarea, select { font: inherit; outline: none; }
 
-/* ── Layout helpers ──────────────────────────────────────── */
+/* ── Overflow guard ────────────────────────────────────────
+   Inline SVGs sometimes carry hardcoded width/height attributes
+   that override CSS sizing rules. This defensive rule ensures
+   SVG icons never force their container wider than available space. */
+svg { max-width: 100%; }
+
+/* ── Container ─────────────────────────────────────────────── */
 .container {
   width: 100%;
   max-width: var(--page-max);
   margin-inline: auto;
   padding-inline: var(--page-pad);
+  /* Nunca desborda */
+  overflow-x: hidden;
 }
 
-/* Sections — generous vertical rhythm */
 .section        { padding-block: var(--section-y); }
 .section--gray  { background: var(--off-white); }
 .section--dark  { background: var(--navy); }
 .section--dark2 { background: var(--navy-2); }
 
-/* ── Divider line between sections ───────────────────────── */
-.section + .section--gray,
-.section--gray + .section {
-  position: relative;
-}
+/* ── Typography ────────────────────────────────────────────── */
+h1,h2,h3,h4 { font-family: var(--serif); line-height: 1.15; }
 
-/* ── Typography scale ────────────────────────────────────── */
-h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.14; }
-
-/* Eyebrow label above headings */
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: .68rem;
+  gap: 7px;
+  font-size: .66rem;
   font-weight: 700;
-  letter-spacing: .16em;
+  letter-spacing: .15em;
   text-transform: uppercase;
   color: var(--blue);
-  margin-bottom: .75rem;
+  margin-bottom: .7rem;
 }
-/* Small line before eyebrow */
 .eyebrow::before {
   content: '';
   display: block;
-  width: 22px;
+  width: 20px;
   height: 2px;
   background: currentColor;
   border-radius: 1px;
@@ -127,41 +125,38 @@ h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.14; }
 }
 .eyebrow--light { color: var(--accent); }
 
-/* Hero headline */
 .h-xl {
-  font-size: clamp(2.2rem, 5.5vw, 4.2rem);
+  font-size: clamp(1.9rem, 5vw, 4rem);
   font-weight: 700;
   color: var(--white);
-  line-height: 1.1;
+  line-height: 1.12;
   letter-spacing: -.01em;
 }
 .h-xl em { font-style: italic; color: var(--accent-2); }
 
-/* Section heading */
 .h-lg {
-  font-size: clamp(1.75rem, 3.8vw, 2.9rem);
+  font-size: clamp(1.55rem, 3.5vw, 2.8rem);
   font-weight: 700;
   color: var(--navy);
   letter-spacing: -.01em;
 }
 .h-lg--white { color: var(--white); }
 
-/* Body descriptor */
 .body-lg {
-  font-size: clamp(.95rem, 1.8vw, 1.05rem);
+  font-size: clamp(.9rem, 1.8vw, 1.05rem);
   color: var(--g500);
-  line-height: 1.82;
+  line-height: 1.8;
   max-width: 560px;
 }
 .body-lg--white { color: rgba(255,255,255,.68); }
 
-/* ── Buttons ──────────────────────────────────────────────── */
+/* ── Buttons ───────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: .8rem 1.8rem;
+  padding: .76rem 1.7rem;
   border-radius: var(--r-pill);
   font-size: .86rem;
   font-weight: 600;
@@ -171,67 +166,44 @@ h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.14; }
   white-space: nowrap;
   cursor: pointer;
   border: none;
-  position: relative;
+  /* Never overflow their container */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.btn-blue {
-  background: var(--blue);
-  color: #fff;
-  box-shadow: var(--sh-blue);
-}
-.btn-blue:hover {
-  background: var(--blue-2);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(18,85,181,.42);
-}
-
-.btn-white {
-  background: #fff;
-  color: var(--navy);
-  box-shadow: var(--sh-sm);
-}
+.btn-blue  { background: var(--blue);  color: #fff; box-shadow: var(--sh-blue); }
+.btn-blue:hover  { background: var(--blue-2); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(18,85,181,.42); }
+.btn-white { background: #fff; color: var(--navy); box-shadow: var(--sh-sm); }
 .btn-white:hover { background: var(--g100); transform: translateY(-2px); }
-
-.btn-ghost {
-  background: transparent;
-  color: #fff;
-  border: 1.5px solid rgba(255,255,255,.38);
-}
+.btn-ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.38); }
 .btn-ghost:hover { background: rgba(255,255,255,.1); border-color: #fff; }
-
-.btn-dark { background: var(--navy); color: #fff; }
-.btn-dark:hover { background: var(--navy-2); transform: translateY(-2px); }
-
-.btn-wa {
-  background: #22C55E;
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(34,197,94,.28);
-}
-.btn-wa:hover { background: #16A34A; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,197,94,.38); }
-
-.btn-sm { padding: .58rem 1.25rem; font-size: .8rem; }
-
+.btn-dark  { background: var(--navy); color: #fff; }
+.btn-dark:hover  { background: var(--navy-2); transform: translateY(-2px); }
+.btn-wa    { background: #22C55E; color: #fff; box-shadow: 0 4px 16px rgba(34,197,94,.28); }
+.btn-wa:hover { background: #16A34A; transform: translateY(-2px); }
+.btn-sm    { padding: .55rem 1.2rem; font-size: .8rem; }
 .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-/* ── Scrollbar ────────────────────────────────────────────── */
+/* ── Scrollbar ─────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--g100); }
 ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
 
-/* ── Focus ring ───────────────────────────────────────────── */
+/* ── Focus ─────────────────────────────────────────────────── */
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 3px; }
 
-/* ── Animations ───────────────────────────────────────────── */
+/* ── Animations ─────────────────────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.anim-up { animation: fadeUp .6s var(--ease) both; }
-.d1 { animation-delay: .12s; }
-.d2 { animation-delay: .24s; }
-.d3 { animation-delay: .36s; }
+.anim-up { animation: fadeUp .55s var(--ease) both; }
+.d1 { animation-delay: .1s; }
+.d2 { animation-delay: .22s; }
+.d3 { animation-delay: .34s; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

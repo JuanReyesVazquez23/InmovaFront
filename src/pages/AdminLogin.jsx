@@ -5,7 +5,15 @@ export default function AdminLogin({ onSuccess, onCancel, apiBase = '' }) {
   const [form, setForm]         = useState({ username: '', password: '' })
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
-  const [attempts, setAttempts] = useState(0)
+  // Persist attempt count in sessionStorage so page reload doesn't reset it
+  const [attempts, setAttempts] = useState(() => {
+    try { return parseInt(sessionStorage.getItem('_ia') || '0', 10) } catch { return 0 }
+  })
+
+  const bumpAttempts = (n) => {
+    setAttempts(n)
+    try { sessionStorage.setItem('_ia', String(n)) } catch {}
+  }
 
   const handleChange = (e) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
@@ -38,7 +46,7 @@ export default function AdminLogin({ onSuccess, onCancel, apiBase = '' }) {
       if (res.ok && data.success) {
         onSuccess()
       } else {
-        setAttempts(a => a + 1)
+        bumpAttempts(attempts + 1)
         setError(data.error || 'Credenciales incorrectas.')
         setForm(f => ({ ...f, password: '' }))
       }

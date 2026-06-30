@@ -3,6 +3,8 @@ import './ContactForm.css'
 
 export default function ContactForm({ apiBase = '' }) {
   const [form, setForm]       = useState({ name: '', phone: '', email: '', message: '' })
+  // Honeypot: bots fill this; real users never see it (visually hidden)
+  const [honeypot, setHoneypot] = useState('')
   const [errors, setErrors]   = useState({})
   const [status, setStatus]   = useState(null) // null | 'sending' | 'success' | 'error'
   const [csrfToken, setCsrf]  = useState('')
@@ -40,6 +42,12 @@ export default function ContactForm({ apiBase = '' }) {
     const validationErrors = validate()
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors)
+      return
+    }
+
+    // Honeypot check — bots fill hidden fields, humans don't
+    if (honeypot) {
+      setStatus('success') // Fake success so bots don't retry
       return
     }
 
@@ -198,6 +206,24 @@ export default function ContactForm({ apiBase = '' }) {
         ) : 'Enviar mensaje'}
       </button>
 
+      {/* Honeypot: visually hidden, bots fill it, humans don't */}
+      <input
+        type="text"
+        name="website"
+        value={honeypot}
+        onChange={e => setHoneypot(e.target.value)}
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          left: '-9999px',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+          opacity: 0,
+        }}
+        autoComplete="off"
+      />
       <p className="form-privacy">
         Tus datos son confidenciales y solo serán usados para atender tu solicitud.
       </p>
